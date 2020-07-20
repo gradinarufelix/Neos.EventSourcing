@@ -15,8 +15,9 @@ use Doctrine\ORM\EntityManagerInterface as DoctrineEntityManagerInterface;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\UnitOfWork;
 use Neos\EventSourcing\Exception;
-use Neos\Flow\Log\SystemLoggerInterface;
+use Neos\Flow\Log\ThrowableStorageInterface;
 use Neos\Flow\Annotations as Flow;
+use Psr\Log\LoggerInterface;
 
 /**
  * A persistence manager for Doctrine-based projectors
@@ -26,12 +27,17 @@ use Neos\Flow\Annotations as Flow;
  */
 class DoctrineProjectionPersistenceManager
 {
+    /**
+     * @Flow\Inject
+     * @var LoggerInterface
+     */
+    protected $systemLogger;
 
     /**
      * @Flow\Inject
-     * @var SystemLoggerInterface
+     * @var ThrowableStorageInterface
      */
-    protected $systemLogger;
+    protected $throwableStorage;
 
     /**
      * @var DoctrineEntityManagerInterface
@@ -154,18 +160,19 @@ class DoctrineProjectionPersistenceManager
     public function persistAll()
     {
         if (!$this->entityManager->isOpen()) {
-            $this->systemLogger->log('persistAll() skipped flushing data, the Doctrine EntityManager is closed. Check the logs for error message.', LOG_ERR);
+            $this->systemLogger->error('persistAll() skipped flushing data, the Doctrine EntityManager is closed. Check the logs for error message.');
             return;
         }
 
         try {
             $this->entityManager->flush();
         } catch (ORMException $exception) {
-            $this->systemLogger->logException($exception);
+            $message = $this->throwableStorage->logThrowable($exception);
+            $this->logger->error($message, LogEnvironment::fromMethodName(__METHOD__));
             $connection = $this->entityManager->getConnection();
             $connection->close();
             $connection->connect();
-            $this->systemLogger->log('Reconnected the Doctrine EntityManager to the persistence backend.', LOG_INFO);
+            $this->systemLogger->info('Reconnected the Doctrine EntityManager to the persistence backend.');
             $this->entityManager->flush();
         }
     }

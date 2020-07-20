@@ -516,8 +516,8 @@ To implement other custom event listeners you only need to implement the `EventL
 class ConsoleOutputListener implements EventListenerInterface
 {
     /**
-     * @var SystemLoggerInterface
      * @Flow\Inject
+     * @var LoggerInterface
      */
     protected $systemLogger;
 
@@ -527,7 +527,7 @@ class ConsoleOutputListener implements EventListenerInterface
      */
     public function whenButtonWasTagged(ButtonWasTagged $event, RawEvent $rawEventData)
     {
-        $this->systemLogger->log("--- The button {$event->getButtonIdentifer()} was tagged {$event->getTagName()} ---");
+        $this->systemLogger->info("--- The button {$event->getButtonIdentifer()} was tagged {$event->getTagName()} ---");
     }
 }
 ```
