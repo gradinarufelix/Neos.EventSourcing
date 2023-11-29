@@ -3,8 +3,8 @@
     "type": "neos-package",
     "description": "Lean and opinionated way to integrate Event Sourcing and CQRS pattern in your Flow framework package",
     "require": {
-        "php": ">=7.0",
-        "neos/flow": "~5.0 || ~6.0 || ~7.0 || dev-master"
+        "php": ">=7.0 || >=8.0",
+        "neos/flow": "~5.0 || ~6.0 || ~7.0 || ~8.0 || dev-master"
     },
     "suggest": {
         "php-uuid": "For fast generation of UUIDs used in the persistence."
